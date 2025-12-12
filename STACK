@@ -1,0 +1,79 @@
+/*
+5. STACK - Google Docs Undo/Redo Manager 
+Problem: 
+Design the undo/redo engine for Google Docs supporting text editing. 
+Requirements: 
+ Handle 10,000+ operations. 
+ Undo stack can store only latest 50 actions (drop oldest automatically). 
+ Any new action clears the redo stack. 
+ Support two actions: 
+o INSERT(x) 
+o DELETE(k characters) 
+ Return: 
+o final document 
+o total operations performed */
+package assesment;
+
+import java.util.Stack;
+import java.util.Scanner;
+
+public class undo_redo {
+    public static void main(String[] args) {
+
+        Stack<Character> history = new Stack<>();
+        Scanner sc = new Scanner(System.in);
+
+        while (true) {
+
+            System.out.println("\n1. Insert new text");
+            System.out.println("2. UNDO (Remove last character)");
+            System.out.println("3. Current string");
+            System.out.println("4. Exit");
+            System.out.print("Choose option: ");
+
+            int choice = sc.nextInt();
+            sc.nextLine();
+
+            switch (choice) {
+
+                case 1:
+                    System.out.println("Enter text:");
+                    String text = sc.nextLine();
+
+                    for(char c : text.toCharArray()) {
+                        history.push(c);
+                    }
+                    System.out.println("Text added!");
+                    break;
+
+                case 2:
+                    if (history.isEmpty()) {
+                        System.out.println("Nothing to undo!");
+                    } else {
+                        System.out.println("Removed: " + history.pop());
+                    }
+                    break;
+
+                case 3:
+                    if(history.isEmpty()) {
+                        System.out.println("No text yet.");
+                    } else {
+                        StringBuilder current = new StringBuilder();
+                        for(char c : history) {
+                            current.append(c);
+                        }
+                        System.out.println("Current text: " + current);
+                    }
+                    break;
+
+                case 4:
+                    System.out.println("Exiting...");
+                    sc.close();
+                    return;
+
+                default:
+                    System.out.println("Invalid choice. Try again!");
+            }
+        }
+    }
+}
