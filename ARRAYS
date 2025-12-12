@@ -1,0 +1,42 @@
+*/QUESTION
+1. ARRAYS - Fuel-Efficient Route Detection (Google Maps) 
+Problem: 
+You are given an array representing fuel cost per kilo-meter for a long trip. 
+Find the most fuel-efficient contiguous route segment of length ≥ k. 
+Requirements: 
+ Must run in O(n) using sliding window or prefix sums. 
+ Return: start index, end index, and minimum total cost. 
+ If two segments have same cost → choose shorter one. 
+ If still tie → choose the one that starts earlier. */
+
+package assesment;
+
+public class project {
+	public static void main(String[] args){
+        int[] arr = {5,2,3,4,1};
+        int k = 3;
+        int sum=0;
+        int minSum=0;
+        int start=0,end=k;
+
+        for(int i=0;i<k;i++){
+            sum+=arr[i];
+            minSum=sum;
+        }
+
+        for(int i=0;i+k<arr.length;i++){
+            sum+=arr[i+k];
+            sum-=arr[i];
+            if(sum<minSum){
+              minSum=sum;
+              start=i;
+              end=(i+k)-1;
+            }
+
+        }
+        System.out.println("The Minimum contigouous fuel required is:"+minSum);
+        System.out.println("The Array starts from:"+start);
+        System.out.println("The Array ends at:"+end);
+    }
+}
+
