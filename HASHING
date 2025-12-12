@@ -1,0 +1,83 @@
+/*9.  HASHING - Real-Time Fraud Detection System 
+Problem: 
+Given a continuous stream of transactions, detect duplicates within the last k 
+seconds. 
+Requirements: 
+ A duplicate = same transaction ID + amount. 
+ Must process 10 million transactions/day. 
+ Implement using HashMap + Doubly Linked List sliding window. 
+ Return: 
+o Whether fraud occurred 
+o All suspicious transaction IDs*/
+
+package assesment;
+
+import java.util.*;
+
+public class hashing {
+
+    static class Txn {
+        String id;
+        double amt;
+        long ts;
+        Txn prev, next;
+        Txn(String i,double a,long t){id=i;amt=a;ts=t;}
+    }
+
+    static class Result {
+        boolean fraud;
+        List<String> ids;
+        Result(boolean f,List<String> i){fraud=f;ids=i;}
+    }
+
+    Txn head=null, tail=null;
+    Map<String,Txn> map=new HashMap<>();
+    long window;
+
+    public hashing(long k){window=k*1000;}
+
+    private void add(Txn t){
+        if(tail==null){head=tail=t;}
+        else{
+            tail.next=t;
+            t.prev=tail;
+            tail=t;
+        }
+    }
+
+    private void remove(Txn t){
+        if(t.prev!=null) t.prev.next=t.next; else head=t.next;
+        if(t.next!=null) t.next.prev=t.prev; else tail=t.prev;
+    }
+
+    private String makeKey(String id,double amt){
+        return id+"#"+amt;
+    }
+
+    public Result process(String id,double amt){
+        long now=System.currentTimeMillis();
+        while(head!=null && now-head.ts>window){
+            map.remove(makeKey(head.id,head.amt));
+            remove(head);
+        }
+        String key=makeKey(id,amt);
+        boolean dup=map.containsKey(key);
+        List<String> out=new ArrayList<>();
+        if(dup) out.add(id);
+        Txn t=new Txn(id,amt,now);
+        add(t);
+        map.put(key,t);
+        return new Result(dup,out);
+    }
+
+    public static void main(String[] args){
+    	hashing f=new hashing(5);
+
+        System.out.println(f.process("T1",100).fraud);
+        System.out.println(f.process("T2",200).fraud);
+        System.out.println(f.process("T1",100).fraud);
+
+        Result r=f.process("T1",100);
+        System.out.println(r.fraud+" "+r.ids);
+    }
+}
