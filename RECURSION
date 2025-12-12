@@ -1,0 +1,79 @@
+/*3. RECURSION - File Explorer Folder Size Computation 
+Problem: 
+Compute the total size of a folder that contains nested folders and files. 
+Requirements: 
+ Folder structure is a tree but may contain symbolic links → detect cycles. 
+ Use recursion + memoization to avoid recomputing sizes. 
+ Also return the largest 3 files inside the folder. 
+ No global static variables allowed.*/
+
+package assesment;
+
+import java.util.*;
+
+class FileNode {
+    String name;
+    long size;
+    boolean isFile;
+    List<FileNode> children;
+    FileNode(String n,long s,boolean f){name=n;size=s;isFile=f;children=new ArrayList<>();}
+}
+
+class Result {
+    long totalSize;
+    PriorityQueue<FileNode> top3;
+    Result(long t,PriorityQueue<FileNode> q){totalSize=t;top3=q;}
+}
+
+public class recurssion_file {
+    public Result compute(FileNode root){
+        return dfs(root,new HashSet<>(),new HashMap<>());
+    }
+
+    private Result dfs(FileNode node,Set<FileNode> path,Map<FileNode,Result> memo){
+        if(memo.containsKey(node)) return memo.get(node);
+        if(path.contains(node)) return new Result(0,new PriorityQueue<>(Comparator.comparingLong(f->f.size)));
+        path.add(node);
+        long s=0;
+        PriorityQueue<FileNode> pq=new PriorityQueue<>(Comparator.comparingLong(f->f.size));
+        if(node.isFile){
+            s=node.size;
+            pq.offer(node);
+        } else {
+            for(FileNode c:node.children){
+                Result r=dfs(c,path,memo);
+                s+=r.totalSize;
+                for(FileNode f:r.top3){
+                    pq.offer(f);
+                    if(pq.size()>3) pq.poll();
+                }
+            }
+        }
+        path.remove(node);
+        Result res=new Result(s,pq);
+        memo.put(node,res);
+        return res;
+    }
+
+    public static void main(String[] args){
+        FileNode f1=new FileNode("a",10,true);
+        FileNode f2=new FileNode("b",50,true);
+        FileNode f3=new FileNode("c",5,true);
+        FileNode f4=new FileNode("d",2,true);
+        FileNode f5=new FileNode("e",3,true);
+        
+        
+        FileNode fold=new FileNode("root",0,false);
+        fold.children.add(f1);
+        fold.children.add(f2);
+        fold.children.add(f3);
+        fold.children.add(f4);
+        fold.children.add(f5);
+        recurssion_file fs=new recurssion_file();
+        Result r=fs.compute(fold);
+        System.out.println("Total size of the folder: ");
+        System.out.println(r.totalSize);
+        System.out.println("3 Largest Files are: ");
+        for(FileNode f:r.top3) System.out.println(f.name+" "+f.size);
+    }
+}
