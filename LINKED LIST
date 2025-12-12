@@ -1,0 +1,104 @@
+/* 4. LINKED LIST - Music Playlist Engine (Spotify-like) 
+Problem: 
+Build a playlist system with: 
+ playNext() 
+ playPrev() 
+ addSong() 
+ removeSong() 
+ prevent duplicate songs 
+Requirements: 
+ All operations must run in O(1) using doubly linked list + HashSet. 
+ Maintain a current pointer that moves dynamically. 
+ Support exporting playlist both forward and backward.*/
+
+package assesment;
+
+public class linked_list {
+    private static class SongNode {
+        String songTitle;
+        double duration;
+        SongNode prev;
+        SongNode next;
+
+        public SongNode(String songTitle, double duration) {
+            this.songTitle = songTitle;
+            this.duration = duration;
+            this.prev = null;
+            this.next = null;
+        }
+    }
+
+    private SongNode head;
+    private SongNode tail;
+    private SongNode current;
+
+    public linked_list() {
+        this.head = null;
+        this.tail = null;
+        this.current = null;
+    }
+
+    public void addSong(String title, double duration) {
+        SongNode newNode = new SongNode(title, duration);
+        if (head == null) {
+            head = newNode;
+            tail = newNode;
+            current = newNode;
+        } else {
+            tail.next = newNode;
+            newNode.prev = tail;
+            tail = newNode;
+        }
+    }
+
+    public void playCurrentSong() {
+        if (current != null) {
+            System.out.println("Now Playing: " + current.songTitle + " (" + current.duration + " mins)");
+        } else {
+            System.out.println("Playlist is empty or finished.");
+        }
+    }
+
+    public void nextSong() {
+        if (current != null && current.next != null) {
+            current = current.next;
+            playCurrentSong();
+        } else if (current != null && current.next == null) {
+            System.out.println("Reached end of playlist.");
+        } else {
+            System.out.println("Cannot go next. Playlist is empty.");
+        }
+    }
+
+    public void previousSong() {
+        if (current != null && current.prev != null) {
+            current = current.prev;
+            playCurrentSong();
+        } else if (current != null && current.prev == null) {
+            System.out.println("Reached start of playlist.");
+        } else {
+            System.out.println("Cannot go previous. Playlist is empty.");
+        }
+    }
+
+    public static void main(String[] args) {
+    	linked_list playlist = new linked_list();
+
+        playlist.addSong("Victory Lap Five", 5.45);
+        playlist.addSong("Like Him", 4.38);
+        playlist.addSong("Circles", 3.35);
+        playlist.addSong("I Can Talk", 2.56);
+
+        System.out.println("Starting Playlist");
+        playlist.playCurrentSong();
+
+        System.out.println("\nNext Song");
+        playlist.nextSong();
+
+        System.out.println("\nNext Song");
+        playlist.nextSong();
+
+        System.out.println("\nPrevious Song");
+        playlist.previousSong();
+    }
+}
