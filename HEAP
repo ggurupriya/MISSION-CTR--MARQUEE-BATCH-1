@@ -1,0 +1,75 @@
+/*
+8. HEAP - YouTube Real-Time Trending Videos 
+Problem: 
+Each video has a dynamic "trending score" updated in real-time. 
+Return top K trending videos. 
+Requirements: 
+ updateScore(videoID, score) must run in O(log n). 
+ Fetch top-K in O(k log n). 
+ Videos not watched for 24 hours → lose 10% score automatically. 
+ If two videos have same score → newest timestamp is higher priority.*/
+
+package assesment;
+
+import java.util.*;
+
+public class heap {
+
+    static class Video {
+        String id;
+        double score;
+        long ts;
+        Video(String i,double s,long t){id=i;score=s;ts=t;}
+    }
+
+    Map<String,Video> map=new HashMap<>();
+    PriorityQueue<Video> pq=new PriorityQueue<>(
+        (a,b)-> a.score==b.score ? Long.compare(b.ts,a.ts) : Double.compare(b.score,a.score)
+    );
+
+    public void updateScore(String id,double s){
+        long t=System.currentTimeMillis();
+        if(map.containsKey(id)){
+            Video v=map.get(id);
+            pq.remove(v);
+            v.score=s;
+            v.ts=t;
+            pq.add(v);
+        } else {
+            Video v=new Video(id,s,t);
+            map.put(id,v);
+            pq.add(v);
+        }
+    }
+
+    public void applyDecay(){
+        long now=System.currentTimeMillis();
+        List<Video> list=new ArrayList<>(pq);
+        pq.clear();
+        for(Video v:list){
+            if(now-v.ts>=86400000) v.score*=0.9;
+            pq.add(v);
+        }
+    }
+
+    public List<Video> topK(int k){
+        List<Video> res=new ArrayList<>();
+        PriorityQueue<Video> temp=new PriorityQueue<>(pq);
+        for(int i=0;i<k && !temp.isEmpty();i++) res.add(temp.poll());
+        return res;
+    }
+
+    public static void main(String[] args){
+        heap h=new heap();
+
+        h.updateScore("A",50);
+        h.updateScore("B",90);
+        h.updateScore("C",70);
+
+        h.updateScore("A",95);
+
+        List<Video> top=h.topK(2);
+        System.out.println("Total Trending score: ");
+        for(Video v:top) System.out.println(v.id+" "+v.score);
+    }
+}
