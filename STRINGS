@@ -1,0 +1,65 @@
+/* STRINGS - Gmail Autocorrect Suggestion Engine
+2.  STRINGS - Gmail Autocorrect Suggestion Engine 
+Problem: 
+Given a typed incorrect word and a dictionary of valid words, 
+find the closest valid suggestions using minimum edit distance. 
+Requirements: 
+ Dictionary size can be up to 100,000 words → must optimize. 
+ Return the top 3 closest words, not just one. 
+ Ties: return lexicographically smallest. 
+ Total computation must be < 100 ms per query. */
+
+package assesment;
+import java.util.*;
+
+public class auto_correct {
+
+    static int editDistance(String a, String b) {
+        int n = a.length(), m = b.length();
+        int[][] dp = new int[n+1][m+1];
+
+        for (int i = 0; i <= n; i++) 
+        	dp[i][0] = i;
+        for (int j = 0; j <= m; j++) 
+        	dp[0][j] = j;
+
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= m; j++) {
+                if (a.charAt(i-1) == b.charAt(j-1))
+                    dp[i][j] = dp[i-1][j-1];
+                else
+                    dp[i][j] = 1 + Math.min(dp[i-1][j-1],
+                                    Math.min(dp[i-1][j], dp[i][j-1]));
+            }
+        }
+        return dp[n][m];
+    }
+
+    static List<String> suggest(String typed, List<String> dict) {
+        List<String> result = new ArrayList<>();
+
+        List<String> words = new ArrayList<>(dict);
+
+        // distance & lexicographically
+        Collections.sort(words, (a, b) -> {
+            int da = editDistance(typed, a);
+            int db = editDistance(typed, b);
+            if (da != db) return da - db;
+            return a.compareTo(b);
+        });
+
+        return words.subList(0, Math.min(3, words.size()));
+    }
+
+    public static void main(String[] args) {
+        List<String> dict = Arrays.asList(
+            "Work", "World", "Worst", "Women", "Wood", "Waste", "Walk","Wonder","Water","Week","Wake"
+        );
+
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Enter word: ");
+        String typed = sc.next();
+
+        System.out.println("Suggestions: " + suggest(typed, dict));
+    }
+}
