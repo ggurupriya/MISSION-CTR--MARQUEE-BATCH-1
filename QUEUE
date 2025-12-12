@@ -1,0 +1,138 @@
+/*6. QUEUE - Hospital Emergency Priority System 
+Problem: 
+Patients arrive with name, severity, and arrival time. 
+Create a system to pick patients in correct priority order. 
+Requirements: 
+ Maintain 2 queues: 
+o Critical Queue (8–10 severity) 
+o Normal Queue (1–7 severity) 
+ At least 1 critical patient every 5 minutes must be treated. 
+ If severity is same → earlier arrival first. 
+ Must support real-time updates and retrieval.*/
+
+package assesment;
+
+import java.util.*;
+
+class Patient {
+    String id;
+    int severity;
+    long arrivalTime; 
+
+    Patient(String id, int severity) {
+        this.id = id;
+        this.severity = severity;
+        this.arrivalTime = System.currentTimeMillis();
+    }
+}
+
+class BookingQueue {
+
+    Queue<Patient> critical = new LinkedList<>();
+    Queue<Patient> normal = new LinkedList<>();
+
+    long lastCriticalTime = System.currentTimeMillis();
+
+    void join(String id, int severity) {
+        Patient p = new Patient(id, severity);
+
+        if (severity >= 8) critical.offer(p);
+        else normal.offer(p);
+
+        System.out.println("Patient added: " + id);
+    }
+
+    void book() {
+        Patient p = null;
+        long now = System.currentTimeMillis();
+
+        // Rule: At least 1 critical patient every 5 minutes
+        boolean fiveMinPassed = (now - lastCriticalTime) >= 5 * 60 * 1000;
+
+        if (!critical.isEmpty()) {
+            p = critical.poll();
+            lastCriticalTime = now;
+        }
+        else if (fiveMinPassed && !critical.isEmpty()) {
+            p = critical.poll();
+            lastCriticalTime = now;
+        }
+        else if (!normal.isEmpty()) {
+            p = normal.poll();
+        }
+
+        if (p != null) {
+            System.out.println("Treating: " + p.id + " (Severity " + p.severity + ")");
+        } else {
+            System.out.println("No patients in queue");
+        }
+    }
+
+    void current() {
+        Patient next = null;
+
+        if (!critical.isEmpty()) next = critical.peek();
+        else if (!normal.isEmpty()) next = normal.peek();
+
+        if (next != null)
+            System.out.println("Next: " + next.id + " (Severity " + next.severity + ")");
+        else
+            System.out.println("No patients waiting");
+    }
+
+    void status() {
+        System.out.println("Critical Queue: " + critical.size());
+        System.out.println("Normal Queue: " + normal.size());
+    }
+}
+
+public class hospital_emmergency {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        BookingQueue b = new BookingQueue();
+        boolean run = true;
+
+        while (run) {
+            System.out.println("\n1. New Patient");
+            System.out.println("2. Treat Next Patient");
+            System.out.println("3. Queue Status");
+            System.out.println("4. Next Patient");
+            System.out.println("5. Exit");
+            System.out.print("Enter choice: ");
+
+            int ch = sc.nextInt();
+
+            switch (ch) {
+                case 1:
+                    System.out.print("Enter Name: ");
+                    String id = sc.next();
+                    System.out.print("Enter Severity (1–10): ");
+                    int sev = sc.nextInt();
+                    b.join(id, sev);
+                    break;
+
+                case 2:
+                    b.book();
+                    break;
+
+                case 3:
+                    b.status();
+                    break;
+
+                case 4:
+                    b.current();
+                    break;
+
+                case 5:
+                    run = false;
+                    System.out.println("System Closed");
+                    break;
+
+                default:
+                    System.out.println("Invalid Choice");
+            }
+        }
+
+        sc.close();
+    }
+}
